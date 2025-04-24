@@ -10,23 +10,38 @@
   </style>
 </head>
 <body>
-  <div id="aphorism">Завантажуємо…</div>
-  <button id="new">Нове</button>
+  <div id="aphorism">Завантажую афоризми…</div>
+  <button id="new" disabled>Нове</button>
 
   <script>
-    const aphorisms = [
-      "Людина, якій ви найбільше боїтесь заперечити, — це ви самі.",
-      "Ідея стає цікавою, коли ви починаєте боятись довести її до завершення.",
-      // ...додайте сюди всі інші афоризми у лапках, через кому...
-    ];
+    let aphorisms = [];
 
-    function show() {
+    // Завантажуємо текстовий файл з афоризмами
+    fetch('aphorisms.txt')
+      .then(resp => resp.text())
+      .then(text => {
+        // Розбиваємо по роздільнику '***'
+        aphorisms = text
+          .split('***')
+          .map(s => s.trim())
+          .filter(s => s.length > 0);
+
+        // Активуємо кнопку і виводимо перший афоризм
+        document.getElementById('new').disabled = false;
+        showAphorism();
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById('aphorism').textContent = 
+          'Помилка завантаження афоризмів.';
+      });
+
+    function showAphorism() {
       const idx = Math.floor(Math.random() * aphorisms.length);
       document.getElementById('aphorism').textContent = aphorisms[idx];
     }
 
-    document.getElementById('new').addEventListener('click', show);
-    show();
+    document.getElementById('new').addEventListener('click', showAphorism);
   </script>
 </body>
 </html>
