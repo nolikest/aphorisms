@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>Афоризми Талеба</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; }
+    #aphorism { font-size: 1.5rem; margin-bottom: 1rem; }
+    button { padding: .5rem 1rem; font-size: 1rem; }
+  </style>
+</head>
+<body>
+  <div id="aphorism">Завантажуємо…</div>
+  <button id="new">Нове</button>
+
+  <script>
+    const aphorisms = [
+      "Людина, якій ви найбільше боїтесь заперечити, — це ви самі.",
+      "Ідея стає цікавою, коли ви починаєте боятись довести її до завершення.",
+      // ...додайте сюди всі інші афоризми у лапках, через кому...
+    ];
+
+    function show() {
+      const idx = Math.floor(Math.random() * aphorisms.length);
+      document.getElementById('aphorism').textContent = aphorisms[idx];
+    }
+
+    document.getElementById('new').addEventListener('click', show);
+    show();
+  </script>
+</body>
+</html>
