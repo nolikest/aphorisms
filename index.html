@@ -3,100 +3,153 @@
 <head>
   <meta charset="UTF-8">
   <title>Афоризми Талеба</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Roboto&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
       padding: 0;
       font-family: 'Roboto', sans-serif;
-      background: linear-gradient(135deg, #f0f4ff 0%, #e8f0ff 100%);
-      color: #333;
+      background: linear-gradient(145deg, #e6f0ff, #f9faff);
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       min-height: 100vh;
     }
     .card {
       background: white;
-      border-radius: 12px;
+      border-radius: 16px;
       padding: 2rem;
-      max-width: 700px;
+      max-width: 720px;
       width: 90%;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
       transition: transform 0.2s ease;
-      text-align: center;
     }
     .card:hover {
-      transform: translateY(-4px);
+      transform: translateY(-3px);
     }
     #aphorism {
       font-family: 'Playfair Display', serif;
-      font-size: 1.75rem;
-      line-height: 1.4;
+      font-size: 1.8rem;
+      line-height: 1.5;
+      color: #333;
+      text-align: center;
       margin-bottom: 1.5rem;
     }
-    button {
-      background: #0070f3;
-      color: white;
-      border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
+    textarea {
+      width: 100%;
       font-size: 1rem;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      resize: vertical;
+      font-family: 'Roboto', sans-serif;
+    }
+    .btn {
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
       cursor: pointer;
       transition: background 0.2s ease;
     }
-    button:hover {
-      background: #005bb5;
+    #new {
+      background: #0070f3;
+      color: white;
     }
-    button:disabled {
-      background: #ccc;
-      cursor: default;
+    #new:hover {
+      background: #0059c1;
+    }
+    #edit {
+      background: #e2e2e2;
+      margin-left: 0.5rem;
+    }
+    #edit:hover {
+      background: #cfcfcf;
+    }
+    .edit-controls {
+      margin-top: 1rem;
+      display: none;
+    }
+    .save-btn {
+      background: #28a745;
+      color: white;
+      margin-right: 0.5rem;
+    }
+    .save-btn:hover {
+      background: #218838;
+    }
+    .cancel-btn {
+      background: #dc3545;
+      color: white;
+    }
+    .cancel-btn:hover {
+      background: #c82333;
     }
     @media (max-width: 600px) {
-      .card {
-        padding: 1.5rem;
-      }
-      #aphorism {
-        font-size: 1.25rem;
-      }
-      button {
-        width: 100%;
-      }
+      #aphorism { font-size: 1.4rem; }
+      .btn { width: 100%; margin-top: 0.5rem; }
+      #edit { margin-left: 0; }
     }
   </style>
 </head>
 <body>
   <div class="card">
     <div id="aphorism">Завантажую афоризми…</div>
-    <button id="new" disabled>Нове</button>
+    <div style="text-align: center;">
+      <button id="new" class="btn" disabled>🔄 Новий</button>
+      <button id="edit" class="btn">✏️ Редагувати</button>
+    </div>
+
+    <div class="edit-controls" id="edit-section">
+      <textarea id="edit-box" rows="4"></textarea>
+      <div style="text-align: right; margin-top: 0.5rem;">
+        <button class="btn save-btn" onclick="saveEdit()">💾 Зберегти</button>
+        <button class="btn cancel-btn" onclick="cancelEdit()">↩️ Скасувати</button>
+      </div>
+    </div>
   </div>
 
   <script>
     let aphorisms = [];
+    let currentIdx = 0;
 
     fetch('aphorisms.txt')
       .then(resp => resp.text())
       .then(text => {
-        aphorisms = text
-          .split('***')
-          .map(s => s.trim())
-          .filter(s => s.length > 0);
-
+        aphorisms = text.split('***').map(s => s.trim()).filter(Boolean);
         document.getElementById('new').disabled = false;
         showAphorism();
       })
       .catch(err => {
         console.error(err);
-        document.getElementById('aphorism').textContent =
-          'Помилка завантаження афоризмів.';
+        document.getElementById('aphorism').textContent = 'Не вдалося завантажити афоризми.';
       });
 
     function showAphorism() {
-      const idx = Math.floor(Math.random() * aphorisms.length);
-      document.getElementById('aphorism').textContent = aphorisms[idx];
+      currentIdx = Math.floor(Math.random() * aphorisms.length);
+      document.getElementById('aphorism').textContent = aphorisms[currentIdx];
+      document.getElementById('edit-section').style.display = 'none';
+    }
+
+    function saveEdit() {
+      const newText = document.getElementById('edit-box').value.trim();
+      if (newText) {
+        aphorisms[currentIdx] = newText;
+        document.getElementById('aphorism').textContent = newText;
+      }
+      document.getElementById('edit-section').style.display = 'none';
+    }
+
+    function cancelEdit() {
+      document.getElementById('edit-section').style.display = 'none';
     }
 
     document.getElementById('new').addEventListener('click', showAphorism);
+
+    document.getElementById('edit').addEventListener('click', () => {
+      document.getElementById('edit-box').value = aphorisms[currentIdx];
+      document.getElementById('edit-section').style.display = 'block';
+    });
   </script>
 </body>
 </html>
