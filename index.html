@@ -1,6 +1,20 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0070f3">
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js').then(() => {
+        console.log('Service Worker зареєстровано!');
+      });
+    });
+  }
+</script>
+
+  
   <meta charset="UTF-8">
   <title>Афоризми Талеба</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Roboto&display=swap" rel="stylesheet">
