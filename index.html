@@ -130,9 +130,9 @@
   <script>
     let aphorisms = [];
     let dailyIndex = 0;
-    let currentAphorism = '';
-    let currentLang = 'ua';
+    let currentIndex = 0;
     let showingDaily = true;
+    let currentLang = 'ua';
 
     function loadAphorisms(lang = 'ua') {
       const file = lang === 'ua' ? 'aphorisms-ua.txt' : 'aphorisms-en.txt';
@@ -142,11 +142,10 @@
           aphorisms = text.split('***').map(a => a.trim()).filter(Boolean);
           if (aphorisms.length > 0) {
             dailyIndex = getDailyIndex(aphorisms.length);
-            if (showingDaily) {
-              showDailyAphorism();
-            } else {
-              showRandomAphorism();
+            if (currentIndex >= aphorisms.length) {
+              currentIndex = dailyIndex;
             }
+            fadeOutIn(document.getElementById('aphorism'), aphorisms[currentIndex]);
             document.getElementById('random').disabled = false;
             document.getElementById('daily').disabled = false;
             document.getElementById('share').disabled = false;
@@ -173,33 +172,33 @@
       element.style.opacity = 0;
       setTimeout(() => {
         element.textContent = newText;
-        currentAphorism = newText;
         element.style.opacity = 1;
       }, 400);
     }
 
     function showDailyAphorism() {
-      const aphorismEl = document.getElementById('aphorism');
-      fadeOutIn(aphorismEl, aphorisms[dailyIndex]);
+      currentIndex = dailyIndex;
+      fadeOutIn(document.getElementById('aphorism'), aphorisms[currentIndex]);
       showingDaily = true;
     }
 
     function showRandomAphorism() {
-      const aphorismEl = document.getElementById('aphorism');
       let randomIndex;
       do {
         randomIndex = Math.floor(Math.random() * aphorisms.length);
       } while (randomIndex === dailyIndex);
-      fadeOutIn(aphorismEl, aphorisms[randomIndex]);
+      currentIndex = randomIndex;
+      fadeOutIn(document.getElementById('aphorism'), aphorisms[currentIndex]);
       showingDaily = false;
     }
 
     function shareAphorism() {
+      const text = aphorisms[currentIndex];
       if (navigator.share) {
-        navigator.share({ text: currentAphorism })
+        navigator.share({ text: text })
           .catch(err => console.error('Share failed:', err));
       } else {
-        navigator.clipboard.writeText(currentAphorism)
+        navigator.clipboard.writeText(text)
           .then(() => alert('Афоризм скопійовано в буфер обміну!'))
           .catch(err => console.error('Copy failed:', err));
       }
@@ -224,12 +223,10 @@
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js').then(reg => {
         console.log('✅ Service Worker зареєстровано');
-
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              console.log('🔄 Нова версія знайдена, оновлюємо сайт...');
               window.location.reload(true);
             }
           });
@@ -237,7 +234,7 @@
       }).catch(err => console.error('Service Worker не зареєстровано:', err));
     }
 
-    // Завантажити українські афоризми за замовчуванням
+    // Завантажити українські афоризми при старті
     loadAphorisms();
   </script>
 </body>
