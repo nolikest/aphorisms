@@ -15,30 +15,48 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Roboto&display=swap" rel="stylesheet" />
 
   <style>
+    :root {
+      --bg-color: #e4f9f8;
+      --card-color: #ffffff;
+      --text-color: #222222;
+      --button-color: #1F8888;
+      --button-hover: #176e6e;
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #1a1a1a;
+      --card-color: #2a2a2a;
+      --text-color: #f0f0f0;
+      --button-color: #007b7b;
+      --button-hover: #005f5f;
+    }
+
     body {
       margin: 0;
       padding: 0;
       font-family: 'Roboto', sans-serif;
-      background: radial-gradient(circle at center, #e4f9f8, #f9ffff);
+      background: var(--bg-color);
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
       text-align: center;
+      transition: background 0.5s ease;
     }
     .card {
-      background: #ffffff;
+      background: var(--card-color);
       border-radius: 20px;
       padding: 2rem;
       max-width: 800px;
       width: 90%;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+      transition: background 0.5s ease, color 0.5s ease;
     }
     #aphorism {
       font-family: 'Playfair Display', serif;
       font-size: 1.8rem;
       line-height: 1.5;
-      color: #222222;
+      color: var(--text-color);
       margin-bottom: 2rem;
       opacity: 0;
       transition: opacity 0.8s ease;
@@ -48,10 +66,11 @@
       gap: 1rem;
       justify-content: center;
       flex-wrap: wrap;
+      margin-top: 1rem;
     }
     button {
       padding: 0.75rem 1.5rem;
-      background: #1F8888;
+      background: var(--button-color);
       color: white;
       font-size: 1rem;
       border: none;
@@ -61,24 +80,42 @@
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
     button:hover {
-      background: #176e6e;
+      background: var(--button-hover);
       transform: translateY(-2px) scale(1.05);
       box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+    }
+    .theme-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: var(--button-color);
+      border: none;
+      border-radius: 30px;
+      padding: 0.5rem 1rem;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .theme-toggle:hover {
+      background: var(--button-hover);
     }
   </style>
 </head>
 <body>
+  <button class="theme-toggle" id="toggleTheme">🌙</button>
   <div class="card">
     <div id="aphorism">Завантаження афоризму…</div>
     <div class="buttons">
       <button id="random" disabled>🔀 Інший</button>
       <button id="daily" disabled>↩️ Афоризм дня</button>
+      <button id="share" disabled>📤 Поділитися</button>
     </div>
   </div>
 
   <script>
     let aphorisms = [];
     let dailyIndex = 0;
+    let currentAphorism = '';
 
     fetch('aphorisms.txt')
       .then(resp => resp.text())
@@ -89,6 +126,7 @@
           showDailyAphorism();
           document.getElementById('random').disabled = false;
           document.getElementById('daily').disabled = false;
+          document.getElementById('share').disabled = false;
         } else {
           document.getElementById('aphorism').textContent = 'Не знайдено афоризмів.';
         }
@@ -111,6 +149,7 @@
       element.style.opacity = 0;
       setTimeout(() => {
         element.textContent = newText;
+        currentAphorism = newText;
         element.style.opacity = 1;
       }, 400);
     }
@@ -129,8 +168,27 @@
       fadeOutIn(aphorismEl, aphorisms[randomIndex]);
     }
 
+    function shareAphorism() {
+      if (navigator.share) {
+        navigator.share({
+          text: currentAphorism
+        }).catch(err => console.error('Share failed:', err));
+      } else {
+        navigator.clipboard.writeText(currentAphorism)
+          .then(() => alert('Афоризм скопійовано в буфер обміну!'))
+          .catch(err => console.error('Copy failed:', err));
+      }
+    }
+
     document.getElementById('random').addEventListener('click', showRandomAphorism);
     document.getElementById('daily').addEventListener('click', showDailyAphorism);
+    document.getElementById('share').addEventListener('click', shareAphorism);
+
+    document.getElementById('toggleTheme').addEventListener('click', () => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('toggleTheme').textContent = isDark ? '🌙' : '☀️';
+    });
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js').then(reg => {
