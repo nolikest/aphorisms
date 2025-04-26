@@ -92,10 +92,9 @@
       transform: translateY(-2px) scale(1.05);
       box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
     }
-    .theme-toggle {
+    .theme-toggle, .lang-toggle {
       position: absolute;
       top: 20px;
-      right: 20px;
       background: var(--button-color);
       border: none;
       border-radius: 30px;
@@ -104,13 +103,21 @@
       cursor: pointer;
       transition: background 0.3s ease;
     }
-    .theme-toggle:hover {
+    .theme-toggle:hover, .lang-toggle:hover {
       background: var(--button-hover);
+    }
+    .theme-toggle {
+      right: 20px;
+    }
+    .lang-toggle {
+      left: 20px;
     }
   </style>
 </head>
 <body>
+  <button class="lang-toggle" id="toggleLang">🇬🇧</button>
   <button class="theme-toggle" id="toggleTheme">🌙</button>
+
   <div class="card">
     <div id="aphorism">Завантаження афоризму…</div>
     <div class="buttons">
@@ -124,24 +131,28 @@
     let aphorisms = [];
     let dailyIndex = 0;
     let currentAphorism = '';
+    let currentLang = 'ua';
 
-    fetch('aphorisms.txt')
-      .then(resp => resp.text())
-      .then(text => {
-        aphorisms = text.split('***').map(a => a.trim()).filter(Boolean);
-        if (aphorisms.length > 0) {
-          dailyIndex = getDailyIndex(aphorisms.length);
-          showDailyAphorism();
-          document.getElementById('random').disabled = false;
-          document.getElementById('daily').disabled = false;
-          document.getElementById('share').disabled = false;
-        } else {
-          document.getElementById('aphorism').textContent = 'Не знайдено афоризмів.';
-        }
-      })
-      .catch(() => {
-        document.getElementById('aphorism').textContent = 'Не вдалося завантажити афоризми.';
-      });
+    function loadAphorisms(lang = 'ua') {
+      const file = lang === 'ua' ? 'aphorisms-ua.txt' : 'aphorisms-en.txt';
+      fetch(file)
+        .then(resp => resp.text())
+        .then(text => {
+          aphorisms = text.split('***').map(a => a.trim()).filter(Boolean);
+          if (aphorisms.length > 0) {
+            dailyIndex = getDailyIndex(aphorisms.length);
+            showDailyAphorism();
+            document.getElementById('random').disabled = false;
+            document.getElementById('daily').disabled = false;
+            document.getElementById('share').disabled = false;
+          } else {
+            document.getElementById('aphorism').textContent = 'Не знайдено афоризмів.';
+          }
+        })
+        .catch(() => {
+          document.getElementById('aphorism').textContent = 'Не вдалося завантажити афоризми.';
+        });
+    }
 
     function getDailyIndex(total) {
       const today = new Date();
@@ -197,6 +208,12 @@
       document.getElementById('toggleTheme').textContent = isDark ? '🌙' : '☀️';
     });
 
+    document.getElementById('toggleLang').addEventListener('click', () => {
+      currentLang = currentLang === 'ua' ? 'en' : 'ua';
+      document.getElementById('toggleLang').textContent = currentLang === 'ua' ? '🇬🇧' : '🇺🇦';
+      loadAphorisms(currentLang);
+    });
+
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js').then(reg => {
         console.log('✅ Service Worker зареєстровано');
@@ -212,6 +229,9 @@
         });
       }).catch(err => console.error('Service Worker не зареєстровано:', err));
     }
+
+    // Завантажуємо українські афоризми за замовчуванням
+    loadAphorisms();
   </script>
 </body>
 </html>
