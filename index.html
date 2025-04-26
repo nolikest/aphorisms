@@ -35,11 +35,6 @@
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
       text-align: center;
     }
-    #date {
-      font-size: 1rem;
-      color: #666666;
-      margin-bottom: 1rem;
-    }
     #aphorism {
       font-family: 'Playfair Display', serif;
       font-size: 1.8rem;
@@ -75,7 +70,6 @@
 </head>
 <body>
   <div class="card">
-    <div id="date">Завантаження дати…</div>
     <div id="aphorism">Завантаження афоризму…</div>
     <div class="buttons">
       <button id="random" disabled>🔀 Інший</button>
@@ -93,7 +87,6 @@
         aphorisms = text.split('***').map(a => a.trim()).filter(Boolean);
         if (aphorisms.length > 0) {
           dailyIndex = getDailyIndex(aphorisms.length);
-          showDate();
           showDailyAphorism();
           document.getElementById('random').disabled = false;
           document.getElementById('daily').disabled = false;
@@ -107,19 +100,12 @@
 
     function getDailyIndex(total) {
       const today = new Date();
-      const seed = today.toISOString().split('T')[0]; // YYYY-MM-DD
+      const seed = today.toISOString().split('T')[0];
       let hash = 0;
       for (let i = 0; i < seed.length; i++) {
         hash = seed.charCodeAt(i) + ((hash << 5) - hash);
       }
       return Math.abs(hash) % total;
-    }
-
-    function showDate() {
-      const today = new Date();
-      const options = { day: 'numeric', month: 'long', year: 'numeric' };
-      const formattedDate = today.toLocaleDateString('uk-UA', options);
-      document.getElementById('date').textContent = `Афоризм дня на ${formattedDate}`;
     }
 
     function fadeOutIn(element, newText) {
