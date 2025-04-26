@@ -132,6 +132,7 @@
     let dailyIndex = 0;
     let currentAphorism = '';
     let currentLang = 'ua';
+    let showingDaily = true;
 
     function loadAphorisms(lang = 'ua') {
       const file = lang === 'ua' ? 'aphorisms-ua.txt' : 'aphorisms-en.txt';
@@ -141,7 +142,11 @@
           aphorisms = text.split('***').map(a => a.trim()).filter(Boolean);
           if (aphorisms.length > 0) {
             dailyIndex = getDailyIndex(aphorisms.length);
-            showDailyAphorism();
+            if (showingDaily) {
+              showDailyAphorism();
+            } else {
+              showRandomAphorism();
+            }
             document.getElementById('random').disabled = false;
             document.getElementById('daily').disabled = false;
             document.getElementById('share').disabled = false;
@@ -176,6 +181,7 @@
     function showDailyAphorism() {
       const aphorismEl = document.getElementById('aphorism');
       fadeOutIn(aphorismEl, aphorisms[dailyIndex]);
+      showingDaily = true;
     }
 
     function showRandomAphorism() {
@@ -185,6 +191,7 @@
         randomIndex = Math.floor(Math.random() * aphorisms.length);
       } while (randomIndex === dailyIndex);
       fadeOutIn(aphorismEl, aphorisms[randomIndex]);
+      showingDaily = false;
     }
 
     function shareAphorism() {
@@ -230,7 +237,7 @@
       }).catch(err => console.error('Service Worker не зареєстровано:', err));
     }
 
-    // Завантажуємо українські афоризми за замовчуванням
+    // Завантажити українські афоризми за замовчуванням
     loadAphorisms();
   </script>
 </body>
