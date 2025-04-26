@@ -24,6 +24,7 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      text-align: center;
     }
     .card {
       background: #ffffff;
@@ -34,12 +35,19 @@
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
       text-align: center;
     }
+    #date {
+      font-size: 1rem;
+      color: #666666;
+      margin-bottom: 1rem;
+    }
     #aphorism {
       font-family: 'Playfair Display', serif;
       font-size: 1.8rem;
       line-height: 1.5;
       color: #222222;
       margin-bottom: 2rem;
+      opacity: 0;
+      transition: opacity 0.8s ease;
     }
     .buttons {
       display: flex;
@@ -53,18 +61,22 @@
       color: white;
       font-size: 1rem;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
-      transition: background 0.2s ease;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
     button:hover {
       background: #176e6e;
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <div id="aphorism">Завантаження…</div>
+    <div id="date">Завантаження дати…</div>
+    <div id="aphorism">Завантаження афоризму…</div>
     <div class="buttons">
       <button id="random" disabled>🔀 Інший</button>
       <button id="daily" disabled>↩️ Афоризм дня</button>
@@ -81,6 +93,7 @@
         aphorisms = text.split('***').map(a => a.trim()).filter(Boolean);
         if (aphorisms.length > 0) {
           dailyIndex = getDailyIndex(aphorisms.length);
+          showDate();
           showDailyAphorism();
           document.getElementById('random').disabled = false;
           document.getElementById('daily').disabled = false;
@@ -102,16 +115,33 @@
       return Math.abs(hash) % total;
     }
 
+    function showDate() {
+      const today = new Date();
+      const options = { day: 'numeric', month: 'long', year: 'numeric' };
+      const formattedDate = today.toLocaleDateString('uk-UA', options);
+      document.getElementById('date').textContent = `Афоризм дня на ${formattedDate}`;
+    }
+
+    function fadeOutIn(element, newText) {
+      element.style.opacity = 0;
+      setTimeout(() => {
+        element.textContent = newText;
+        element.style.opacity = 1;
+      }, 400);
+    }
+
     function showDailyAphorism() {
-      document.getElementById('aphorism').textContent = aphorisms[dailyIndex];
+      const aphorismEl = document.getElementById('aphorism');
+      fadeOutIn(aphorismEl, aphorisms[dailyIndex]);
     }
 
     function showRandomAphorism() {
+      const aphorismEl = document.getElementById('aphorism');
       let randomIndex;
       do {
         randomIndex = Math.floor(Math.random() * aphorisms.length);
-      } while (randomIndex === dailyIndex); // Не показувати той самий, що афоризм дня
-      document.getElementById('aphorism').textContent = aphorisms[randomIndex];
+      } while (randomIndex === dailyIndex);
+      fadeOutIn(aphorismEl, aphorisms[randomIndex]);
     }
 
     document.getElementById('random').addEventListener('click', showRandomAphorism);
