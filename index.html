@@ -41,6 +41,12 @@
       color: #222222;
       margin-bottom: 2rem;
     }
+    .buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
     button {
       padding: 0.75rem 1.5rem;
       background: #1F8888;
@@ -59,29 +65,57 @@
 <body>
   <div class="card">
     <div id="aphorism">Завантаження…</div>
-    <button id="new" disabled>🔄 Інший афоризм</button>
+    <div class="buttons">
+      <button id="random" disabled>🔀 Інший</button>
+      <button id="daily" disabled>↩️ Афоризм дня</button>
+    </div>
   </div>
 
   <script>
     let aphorisms = [];
+    let dailyIndex = 0;
 
     fetch('aphorisms.txt')
       .then(resp => resp.text())
       .then(text => {
         aphorisms = text.split('***').map(a => a.trim()).filter(Boolean);
-        document.getElementById('new').disabled = false;
-        showAphorism();
+        if (aphorisms.length > 0) {
+          dailyIndex = getDailyIndex(aphorisms.length);
+          showDailyAphorism();
+          document.getElementById('random').disabled = false;
+          document.getElementById('daily').disabled = false;
+        } else {
+          document.getElementById('aphorism').textContent = 'Не знайдено афоризмів.';
+        }
       })
       .catch(() => {
         document.getElementById('aphorism').textContent = 'Не вдалося завантажити афоризми.';
       });
 
-    function showAphorism() {
-      const random = Math.floor(Math.random() * aphorisms.length);
-      document.getElementById('aphorism').textContent = aphorisms[random];
+    function getDailyIndex(total) {
+      const today = new Date();
+      const seed = today.toISOString().split('T')[0]; // YYYY-MM-DD
+      let hash = 0;
+      for (let i = 0; i < seed.length; i++) {
+        hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      return Math.abs(hash) % total;
     }
 
-    document.getElementById('new').addEventListener('click', showAphorism);
+    function showDailyAphorism() {
+      document.getElementById('aphorism').textContent = aphorisms[dailyIndex];
+    }
+
+    function showRandomAphorism() {
+      let randomIndex;
+      do {
+        randomIndex = Math.floor(Math.random() * aphorisms.length);
+      } while (randomIndex === dailyIndex); // Не показувати той самий, що афоризм дня
+      document.getElementById('aphorism').textContent = aphorisms[randomIndex];
+    }
+
+    document.getElementById('random').addEventListener('click', showRandomAphorism);
+    document.getElementById('daily').addEventListener('click', showDailyAphorism);
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
