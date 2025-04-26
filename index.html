@@ -1,32 +1,25 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0070f3">
-
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('service-worker.js').then(() => {
-        console.log('Service Worker зареєстровано!');
-      });
-    });
-  }
-</script>
-
-  
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Афоризми Талеба</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Roboto&display=swap" rel="stylesheet">
+
+  <!-- 🟢 PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#1F8888" />
+  <link rel="icon" href="icon-192.png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="icon-512.png" />
+
+  <!-- 🟢 Шрифти -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Roboto&display=swap" rel="stylesheet" />
+
   <style>
-    * {
-      box-sizing: border-box;
-    }
     body {
       margin: 0;
       padding: 0;
       font-family: 'Roboto', sans-serif;
-      background: radial-gradient(ellipse at center, #e0f2ff 0%, #f5faff 100%);
+      background: radial-gradient(circle at center, #e4f9f8, #f9ffff);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -35,58 +28,38 @@
     .card {
       background: white;
       border-radius: 20px;
-      padding: 3rem 2rem;
+      padding: 2rem;
       max-width: 800px;
       width: 90%;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
       text-align: center;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.15);
     }
     #aphorism {
       font-family: 'Playfair Display', serif;
-      font-size: 2rem;
+      font-size: 1.8rem;
       line-height: 1.5;
-      color: #222;
       margin-bottom: 2rem;
-      white-space: pre-line;
+      color: #1F8888;
     }
     button {
-      background: #0070f3;
+      padding: 0.75rem 1.5rem;
+      background: #1F8888;
       color: white;
+      font-size: 1rem;
       border: none;
-      padding: 0.8rem 1.6rem;
-      font-size: 1.1rem;
-      border-radius: 10px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: background 0.2s ease, transform 0.2s ease;
+      transition: background 0.2s ease;
     }
     button:hover {
-      background: #0059c1;
-      transform: scale(1.05);
-    }
-    button:disabled {
-      background: #aaa;
-      cursor: not-allowed;
-    }
-    @media (max-width: 600px) {
-      #aphorism {
-        font-size: 1.4rem;
-      }
-      button {
-        width: 100%;
-        font-size: 1rem;
-      }
+      background: #176e6e;
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <div id="aphorism">Завантаження афоризму…</div>
-    <button id="new" disabled>🔄 Показати інший</button>
+    <div id="aphorism">Завантаження…</div>
+    <button id="new" disabled>🔄 Інший афоризм</button>
   </div>
 
   <script>
@@ -95,26 +68,29 @@
     fetch('aphorisms.txt')
       .then(resp => resp.text())
       .then(text => {
-        aphorisms = text
-          .split('***')
-          .map(s => s.trim())
-          .filter(Boolean);
-
+        aphorisms = text.split('***').map(a => a.trim()).filter(Boolean);
         document.getElementById('new').disabled = false;
         showAphorism();
       })
-      .catch(err => {
-        console.error(err);
-        document.getElementById('aphorism').textContent =
-          'Не вдалося завантажити афоризми.';
+      .catch(() => {
+        document.getElementById('aphorism').textContent = 'Не вдалося завантажити афоризми.';
       });
 
     function showAphorism() {
-      const idx = Math.floor(Math.random() * aphorisms.length);
-      document.getElementById('aphorism').textContent = aphorisms[idx];
+      const random = Math.floor(Math.random() * aphorisms.length);
+      document.getElementById('aphorism').textContent = aphorisms[random];
     }
 
     document.getElementById('new').addEventListener('click', showAphorism);
+
+    // Реєстрація service worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+          .then(() => console.log('✅ Service Worker активований'))
+          .catch(err => console.error('Service Worker не запустився:', err));
+      });
+    }
   </script>
 </body>
 </html>
