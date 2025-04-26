@@ -22,7 +22,6 @@
       --button-color: #1F8888;
       --button-hover: #176e6e;
     }
-
     [data-theme="dark"] {
       --bg-color: #1a1a1a;
       --card-color: #2a2a2a;
@@ -30,7 +29,6 @@
       --button-color: #007b7b;
       --button-hover: #005f5f;
     }
-
     body {
       margin: 0;
       padding: 0;
@@ -50,7 +48,17 @@
       max-width: 800px;
       width: 90%;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+      transform: translateY(50px);
+      opacity: 0;
+      animation: fadeSlide 1s ease-out forwards;
+      animation-delay: 0.3s;
       transition: background 0.5s ease, color 0.5s ease;
+    }
+    @keyframes fadeSlide {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
     }
     #aphorism {
       font-family: 'Playfair Display', serif;
@@ -170,9 +178,8 @@
 
     function shareAphorism() {
       if (navigator.share) {
-        navigator.share({
-          text: currentAphorism
-        }).catch(err => console.error('Share failed:', err));
+        navigator.share({ text: currentAphorism })
+          .catch(err => console.error('Share failed:', err));
       } else {
         navigator.clipboard.writeText(currentAphorism)
           .then(() => alert('Афоризм скопійовано в буфер обміну!'))
@@ -193,38 +200,17 @@
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js').then(reg => {
         console.log('✅ Service Worker зареєстровано');
-        
+
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              showUpdateBanner();
+              console.log('🔄 Нова версія знайдена, оновлюємо сайт...');
+              window.location.reload(true);
             }
           });
         });
       }).catch(err => console.error('Service Worker не зареєстровано:', err));
-    }
-
-    function showUpdateBanner() {
-      const banner = document.createElement('div');
-      banner.style.position = 'fixed';
-      banner.style.bottom = '20px';
-      banner.style.left = '50%';
-      banner.style.transform = 'translateX(-50%)';
-      banner.style.background = '#1F8888';
-      banner.style.color = 'white';
-      banner.style.padding = '1rem 2rem';
-      banner.style.borderRadius = '12px';
-      banner.style.boxShadow = '0 4px 10px rgba(0,0,0,0.2)';
-      banner.style.zIndex = '1000';
-      banner.style.cursor = 'pointer';
-      banner.textContent = '🔄 Нова версія сайту! Натисніть, щоб оновити.';
-
-      banner.addEventListener('click', () => {
-        window.location.reload(true);
-      });
-
-      document.body.appendChild(banner);
     }
   </script>
 </body>
