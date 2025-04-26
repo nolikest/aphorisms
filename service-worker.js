@@ -1,4 +1,4 @@
-const CACHE_NAME = 'aphorism-cache-v2';
+const CACHE_NAME = 'aphorism-cache-v3'; // ⚡ нова версія кешу
 const urlsToCache = [
   './',
   './index.html',
@@ -17,13 +17,16 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+      Promise.all(keys
+        .filter(key => key !== CACHE_NAME) // видалити старі кеші
+        .map(key => caches.delete(key))
+      )
     )
   );
 });
 
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request).then(resp => resp || fetch(event.request))
+    caches.match(event.request).then(response => response || fetch(event.request))
   );
 });
