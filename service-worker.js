@@ -1,4 +1,4 @@
-const CACHE_NAME = 'aphorism-cache-v5'; // Нова версія кешу!
+const CACHE_NAME = 'aphorism-cache-v5'; // нова версія кешу
 const urlsToCache = [
   './',
   './index.html',
@@ -9,7 +9,7 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', event => {
-  self.skipWaiting(); // 🔥 автоматичне оновлення при встановленні!
+  self.skipWaiting(); // одразу активувати нову версію
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
   );
@@ -21,7 +21,7 @@ self.addEventListener('activate', event => {
       Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))
     )
   );
-  self.clients.claim(); // 🔥 забираємо керування сторінкою одразу!
+  self.clients.claim(); // перехопити всі відкриті сторінки
 });
 
 self.addEventListener('fetch', event => {
