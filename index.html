@@ -33,7 +33,6 @@
       max-width: 800px;
       width: 90%;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
-      text-align: center;
     }
     #aphorism {
       font-family: 'Playfair Display', serif;
@@ -134,11 +133,40 @@
     document.getElementById('daily').addEventListener('click', showDailyAphorism);
 
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js')
-          .then(() => console.log('✅ Service Worker активований'))
-          .catch(err => console.error('Service Worker не запустився:', err));
+      navigator.serviceWorker.register('service-worker.js').then(reg => {
+        console.log('✅ Service Worker зареєстровано');
+        
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              showUpdateBanner();
+            }
+          });
+        });
+      }).catch(err => console.error('Service Worker не зареєстровано:', err));
+    }
+
+    function showUpdateBanner() {
+      const banner = document.createElement('div');
+      banner.style.position = 'fixed';
+      banner.style.bottom = '20px';
+      banner.style.left = '50%';
+      banner.style.transform = 'translateX(-50%)';
+      banner.style.background = '#1F8888';
+      banner.style.color = 'white';
+      banner.style.padding = '1rem 2rem';
+      banner.style.borderRadius = '12px';
+      banner.style.boxShadow = '0 4px 10px rgba(0,0,0,0.2)';
+      banner.style.zIndex = '1000';
+      banner.style.cursor = 'pointer';
+      banner.textContent = '🔄 Нова версія сайту! Натисніть, щоб оновити.';
+
+      banner.addEventListener('click', () => {
+        window.location.reload(true);
       });
+
+      document.body.appendChild(banner);
     }
   </script>
 </body>
