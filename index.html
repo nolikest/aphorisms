@@ -5,13 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Афоризми Талеба</title>
 
-  <!-- 🟢 PWA -->
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#1F8888" />
   <link rel="icon" href="icon-192.png" sizes="192x192" />
   <link rel="apple-touch-icon" href="icon-512.png" />
 
-  <!-- 🟢 Шрифти -->
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Roboto&display=swap" rel="stylesheet" />
 
   <style>
@@ -114,6 +112,7 @@
     }
   </style>
 </head>
+
 <body>
   <button class="lang-toggle" id="toggleLang">🇬🇧</button>
   <button class="theme-toggle" id="toggleTheme">🌙</button>
@@ -142,7 +141,9 @@
           aphorisms = text.split('***').map(a => a.trim()).filter(Boolean);
           if (aphorisms.length > 0) {
             dailyIndex = getDailyIndex(aphorisms.length);
-            if (currentIndex >= aphorisms.length) {
+            if (showingDaily) {
+              currentIndex = dailyIndex;
+            } else if (currentIndex >= aphorisms.length) {
               currentIndex = dailyIndex;
             }
             fadeOutIn(document.getElementById('aphorism'), aphorisms[currentIndex]);
@@ -223,18 +224,45 @@
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js').then(reg => {
         console.log('✅ Service Worker зареєстровано');
+        setInterval(() => {
+          reg.update();
+        }, 60000); // Перевірка оновлень кожну хвилину
+
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              window.location.reload(true);
+              showUpdatingBanner();
             }
           });
         });
       }).catch(err => console.error('Service Worker не зареєстровано:', err));
     }
 
-    // Завантажити українські афоризми при старті
+    function showUpdatingBanner() {
+      const banner = document.createElement('div');
+      banner.style.position = 'fixed';
+      banner.style.bottom = '20px';
+      banner.style.left = '50%';
+      banner.style.transform = 'translateX(-50%)';
+      banner.style.background = '#1F8888';
+      banner.style.color = 'white';
+      banner.style.padding = '1rem 2rem';
+      banner.style.borderRadius = '12px';
+      banner.style.boxShadow = '0 4px 10px rgba(0,0,0,0.2)';
+      banner.style.zIndex = '1000';
+      banner.style.fontSize = '1.1rem';
+      banner.style.cursor = 'default';
+      banner.textContent = '🔔 Оновлення сайту... Зачекайте...';
+
+      document.body.appendChild(banner);
+
+      setTimeout(() => {
+        window.location.reload(true);
+      }, 2000);
+    }
+
+    // Старт: завантаження українських афоризмів
     loadAphorisms();
   </script>
 </body>
